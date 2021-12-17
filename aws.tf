@@ -32,6 +32,7 @@ resource "aws_instance" "buildserver" {
   tags = {
     Name = "buildserver"
   }
+  key_name = "terraform"
   user_data = <<-EOF
               #!/bin/bash
               apt update

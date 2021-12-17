@@ -35,11 +35,13 @@ resource "aws_instance" "buildserver" {
   key_name = "terraform"
   user_data = <<-EOF
               #!/bin/bash
+              sudo -i
               apt update
               apt install -y default-jdk maven git
               mkdir /java_app
               cd /java_app
               git clone http://github.com/efsavage/hello-world-war.git
+              cd /java_app/hello-world-war
               mvn package
               EOF
 }

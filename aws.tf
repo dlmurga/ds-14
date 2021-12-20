@@ -9,7 +9,8 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  profile = "profile1"
+  region = "${var.region}"
 }
 
 
@@ -43,7 +44,7 @@ resource "aws_instance" "buildserver" {
               sudo -i
               apt update
               apt install -y default-jdk maven git
-              mkdir -p -m 777 /java_app
+              mkdir /java_app
               cd /java_app
               git clone https://github.com/efsavage/hello-world-war.git
               cd /java_app/hello-world-war

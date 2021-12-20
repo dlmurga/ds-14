@@ -47,7 +47,7 @@ resource "aws_instance" "buildserver" {
   }
   connection {
     type = "ssh"
-    host = "self.public.ip"
+    host = [aws_instance.buildserver.public_ip]
     user = "ubuntu"
     private_key = file("/root/keys/terraform.pem")
   }

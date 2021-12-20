@@ -43,7 +43,7 @@ resource "aws_instance" "buildserver" {
               sudo -i
               export AWS_ACCESS_KEY_ID=var.aws_ak
               export AWS_SECRET_ACCESS_KEY=var.aws_sk
-              echo $AWS_ACCESS_KEY_ID > file.txt
+              echo $AWS_ACCESS_KEY_ID > /home/ubuntu/file.txt
               apt update
               apt install -y default-jdk maven git awscli
               mkdir /java_app

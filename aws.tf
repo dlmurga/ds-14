@@ -44,7 +44,7 @@ resource "aws_instance" "buildserver" {
 
   provisioner "file" {
     source = "/root/.aws/credentials"
-    destination = "/ubuntu/home/credentials"
+    destination = "/home/ubuntu/credentials"
   }
   connection {
     type = "ssh"

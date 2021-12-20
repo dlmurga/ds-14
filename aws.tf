@@ -33,6 +33,22 @@ resource "aws_security_group" "allow-ssh" {
   }
 }
 
+resource "aws_security_group" "allow-tomcat" {
+  name = "allow-tomcat"
+  ingress {
+    protocol  = "tcp"
+    from_port = 8080
+    to_port   = 8080
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    protocol  = "-1"
+    from_port = 0
+    to_port   = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "buildserver" {
   ami = "ami-0fb653ca2d3203ac1"
   instance_type = "t2.micro"
@@ -57,13 +73,14 @@ resource "aws_instance" "buildserver" {
               sudo -i
               apt update
               apt install -y default-jdk maven git awscli
-              cp /ubuntu/home/credentials /root/.aws/credentials
+              mkdir /root/.aws
+              cp /home/ubuntu/credentials /root/.aws/credentials
               mkdir /java_app
               cd /java_app
               git clone https://github.com/efsavage/hello-world-war.git
               cd /java_app/hello-world-war
               mvn package
-              aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java_app_ds14/hello-world-war-1.0.0.war
+              aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java-app-ds14/hello-world-war-1.0.0.war
               EOF
 
 }

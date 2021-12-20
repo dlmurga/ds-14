@@ -118,7 +118,7 @@ resource "aws_instance" "tomcatserver" {
               mkdir /root/.aws
               cp /home/ubuntu/credentials /root/.aws/credentials
               mkdir /java_app
-              aws s3 cp s3://java-app-ds14/hello-world-war-1.0.0.war /java_app/s3://java-app-ds14/hello-world-war-1.0.0.war
+              aws s3 cp s3://java-app-ds14/hello-world-war-1.0.0.war /java_app/hello-world-war-1.0.0.war
               docker run -d -p 8080:8080 -v /java_app:/usr/local/tomcat/webapps tomcat:jre8-alpine
               EOF
   depends_on = [aws_instance.buildserver]

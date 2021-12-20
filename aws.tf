@@ -12,7 +12,9 @@ provider "aws" {
   region = "us-east-2"
 }
 
-
+resource "aws_s3_bucket" "s3_bucket" {
+  bucket = "java_app_ds14"
+}
 
 resource "aws_security_group" "allow-ssh" {
   name = "allow-ssh"
@@ -38,19 +40,29 @@ resource "aws_instance" "buildserver" {
     Name = "buildserver"
   }
   key_name = "terraform"
+
+  provisioner "file" {
+    source = "/root/.aws/credentials"
+    destination = "/ubuntu/home/credentials"
+  }
+  connection {
+    type = "ssh"
+    host = "self.public.ip"
+    user = "ubuntu"
+    private_key = file("/root/keys/terraform.pem")
+  }
   user_data = <<-EOF
               #!/bin/bash
               sudo -i
-              export AWS_ACCESS_KEY_ID=var.aws_ak
-              export AWS_SECRET_ACCESS_KEY=var.aws_sk
-              echo $AWS_ACCESS_KEY_ID > /home/ubuntu/file.txt
               apt update
               apt install -y default-jdk maven git awscli
+              cp /ubuntu/home/credentials /root/.aws/credentials
               mkdir /java_app
               cd /java_app
               git clone https://github.com/efsavage/hello-world-war.git
               cd /java_app/hello-world-war
               mvn package
-
+              aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java_app_ds14/hello-world-war-1.0.0.war
               EOF
+
 }

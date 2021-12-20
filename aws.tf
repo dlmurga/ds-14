@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "java_app_ds14"
+  bucket = "java-app-ds14"
 }
 
 resource "aws_security_group" "allow-ssh" {

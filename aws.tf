@@ -68,7 +68,6 @@ resource "aws_instance" "buildserver" {
     source = "/root/.aws/credentials"
     destination = "/home/ubuntu/credentials"
   }
-  }
   connection {
     type = "ssh"
     host = aws_instance.buildserver.public_ip

@@ -12,6 +12,7 @@ provider "aws" {
   region = "us-east-2"
 }
 
+
 resource "aws_s3_bucket" "s3_bucket" {
   bucket = "java-app-ds14"
 }
@@ -47,7 +48,7 @@ resource "aws_instance" "buildserver" {
   }
   connection {
     type = "ssh"
-    host = [aws_instance.buildserver.public_ip]
+    host = aws_instance.buildserver.public_ip
     user = "ubuntu"
     private_key = file("/root/keys/terraform.pem")
   }

@@ -41,6 +41,9 @@ resource "aws_instance" "buildserver" {
   user_data = <<-EOF
               #!/bin/bash
               sudo -i
+              export AWS_ACCESS_KEY_ID=var.aws_ak
+              export AWS_SECRET_ACCESS_KEY=var.aws_sk
+              echo $AWS_ACCESS_KEY_ID > file.txt
               apt update
               apt install -y default-jdk maven git awscli
               mkdir /java_app
@@ -48,8 +51,6 @@ resource "aws_instance" "buildserver" {
               git clone https://github.com/efsavage/hello-world-war.git
               cd /java_app/hello-world-war
               mvn package
-              export AWS_ACCESS_KEY_ID=var.aws_ak
-              export AWS_SECRET_ACCESS_KEY=var.aws_sk
-              echo $AWS_ACCESS_KEY_ID > file.txt
+
               EOF
 }

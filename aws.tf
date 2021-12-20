@@ -38,9 +38,9 @@ resource "aws_instance" "buildserver" {
               sudo -i
               apt update
               apt install -y default-jdk maven git
-              mkdir /java_app
+              mkdir -p -m 777 /java_app
               cd /java_app
-              git clone http://github.com/efsavage/hello-world-war.git
+              git clone https://github.com/efsavage/hello-world-war.git
               cd /java_app/hello-world-war
               mvn package
               EOF

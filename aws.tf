@@ -68,26 +68,27 @@ resource "aws_instance" "buildserver" {
     source = "/root/.aws/credentials"
     destination = "/home/ubuntu/credentials"
   }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo -i",
+      "apt update",
+      "apt install -y default-jdk maven git awscli",
+      "mkdir /root/.aws",
+      "cp /home/ubuntu/credentials /root/.aws/credentials",
+      "mkdir /java_app",
+      "cd /java_app",
+      "git clone https://github.com/efsavage/hello-world-war.git",
+      "cd /java_app/hello-world-war",
+      "mvn package",
+      "aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java-app-ds14/hello-world-war-1.0.0.war"
+    ]
+  }
   connection {
     type = "ssh"
     host = aws_instance.buildserver.public_ip
     user = "ubuntu"
     private_key = file("/root/keys/terraform.pem")
   }
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo -i
-              apt update
-              apt install -y default-jdk maven git awscli
-              mkdir /root/.aws
-              cp /home/ubuntu/credentials /root/.aws/credentials
-              mkdir /java_app
-              cd /java_app
-              git clone https://github.com/efsavage/hello-world-war.git
-              cd /java_app/hello-world-war
-              mvn package
-              aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java-app-ds14/hello-world-war-1.0.0.war
-              EOF
 
 }
 

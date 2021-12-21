@@ -106,5 +106,7 @@ resource "aws_instance" "prodserver" {
   provisioner "local-exec" {
     command = "ansible-playbook -u ubuntu -i prodserver deploy.yml"
   }
+
+  depends_on = [aws_instance.buildserver]
 }
 

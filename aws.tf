@@ -62,6 +62,7 @@ resource "aws_instance" "buildserver" {
   provisioner "remote-exec" {
     inline = ["sudo apt update"]
   }
+
   connection {
     type = "ssh"
     host = aws_instance.buildserver.public_ip
@@ -73,7 +74,37 @@ resource "aws_instance" "buildserver" {
     command = "echo '[buildserver]' > buildserver && echo ${self.public_ip} >> buildserver"
   }
 
-  provisioner "local-exec" {command = "ansible-playbook -u ubuntu -i buildserver build.yml"}
+  provisioner "local-exec" {
+    command = "ansible-playbook -u ubuntu -i buildserver build.yml"
+  }
+}
 
+resource "aws_instance" "prodserver" {
+  ami = "ami-03a0c45ebc70f98ea"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.allow-ssh.id, aws_security_group.allow-tomcat.id]
+  tags = {
+    Name = "prodserver"
+  }
+  key_name = "terraform"
+
+  provisioner "remote-exec" {
+    inline = ["sudo apt update"]
+  }
+
+  connection {
+    type = "ssh"
+    host = aws_instance.prodserver.public_ip
+    user = "ubuntu"
+    private_key = file("/root/keys/terraform.pem")
+  }
+
+  provisioner "local-exec" {
+    command = "echo '[prodserver]' > prodserver && echo ${self.public_ip} >> prodserver"
+  }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook -u ubuntu -i prodserver deploy.yml"
+  }
 }
 

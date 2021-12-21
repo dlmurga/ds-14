@@ -1,0 +1,60 @@
+---
+- name: Deploy java app
+  hosts: prodserver
+  become: yes
+  vars_files:
+    - cred.yml
+
+  tasks:
+    - name: Ensure recuired packages are installed
+      apt:
+        name: [ 'python-pip', 'python3-pip', 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'gnupg-agent' ]
+        state: present
+        update_cache: yes
+
+    - name: Add an apt signing key for Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add apt repository for Docker stable version
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Ensure required python modules are installed
+      pip:
+        name:
+          - boto
+          - boto3
+          - docker
+        state: present
+
+    - name: ensure app folder exists
+      file:
+        path: /app_folder
+        state: directory
+        mode: '0777'
+
+    - name: copying java app from aws s3
+      aws_s3:
+        bucket: java-app-ds14
+        object: hello-world-war-1.0.0.war
+        dest: /app_folder/hello-world-war-1.0.0.war
+        mode: get
+        aws_access_key: "{{ access_key }}"
+        aws_secret_key: "{{ secret_key }}"
+
+    - name:
+      docker_container:
+        name: java_app_tomcat
+        image: tomcat:jre8-alpine
+        volumes: /app_folder:/usr/local/tomcat/webapps
+        ports:
+          "8080:8080"

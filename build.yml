@@ -1,0 +1,51 @@
+---
+- name: Build java app
+  hosts: all
+  become: yes
+  vars_files:
+    - cred.yml
+
+  tasks:
+    - name: ensure recuired packages are installed
+      apt:
+        name: [ 'default-jdk', 'maven', 'git', 'python-pip', 'python3-pip' ]
+        state: present
+        update_cache: yes
+
+    - name: Ensure boto is installed
+      pip:
+        name:
+          - boto
+          - boto3
+        state: present
+
+    - name: ensure package folder exists
+      file:
+        path: /package_folder
+        state: directory
+        mode: '0777'
+
+    - name: clone git repo with java app code
+      git:
+        repo: http://github.com/efsavage/hello-world-war.git
+        dest: /package_folder
+
+    - name: package java app
+      shell:
+        cmd: mvn package
+        chdir: /package_folder
+
+    - name: copying java app to aws s3
+      aws_s3:
+        bucket: java-app-ds14
+        src: /package_folder/target/hello-world-war-1.0.0.war
+        object: hello-world-war-1.0.0.war
+        mode: put
+        aws_access_key: "{{ access_key }}"
+        aws_secret_key: "{{ secret_key }}"
+
+
+
+
+
+

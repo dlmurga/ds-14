@@ -8,15 +8,9 @@
   tasks:
     - name: ensure recuired packages are installed
       apt:
-        name: {{item}}
+        name:  [ 'default-jdk', 'maven', 'git', 'python-pip', 'python3-pip' ]
         state: present
         update_cache: yes
-        with_items:
-          - default-jdk
-          - maven
-          - git
-          - python-pip
-          - python3-pip
     - name: Ensure boto is installed
       pip:
         name:

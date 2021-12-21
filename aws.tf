@@ -74,7 +74,11 @@ resource "aws_instance" "buildserver" {
     private_key = file("/root/keys/terraform.pem")
   }
 
-  provisioner "local-exec" {command = "ansible-playbook -i '${aws_instance.buildserver.public_ip}' build.yml"}
+  provisioner "local-exec" {
+    command = "echo '[buildserver]' > buildserver && echo ${self.public_ip} >> buildserver"
+  }
+
+  provisioner "local-exec" {command = "ansible-playbook -i buildserver build.yml"}
 
 }
 

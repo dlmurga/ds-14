@@ -56,7 +56,7 @@ resource "aws_security_group" "allow-tomcat" {
 }
 
 resource "aws_instance" "buildserver" {
-  ami = "ami-0fb653ca2d3203ac1"
+  ami = "ami-03a0c45ebc70f98ea"
   instance_type = "t2.micro"
   vpc_security_group_ids = [aws_security_group.allow-ssh.id]
   tags = {
@@ -64,9 +64,8 @@ resource "aws_instance" "buildserver" {
   }
   key_name = "terraform"
 
-  provisioner "file" {
-    source = "/root/.aws/credentials"
-    destination = "/home/ubuntu/credentials"
+  provisioner "remote-exec" {
+    inline = ["echo server is up"]
   }
   connection {
     type = "ssh"
@@ -74,52 +73,8 @@ resource "aws_instance" "buildserver" {
     user = "ubuntu"
     private_key = file("/root/keys/terraform.pem")
   }
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo -i
-              apt update
-              apt install -y default-jdk maven git awscli
-              mkdir /root/.aws
-              cp /home/ubuntu/credentials /root/.aws/credentials
-              mkdir /java_app
-              cd /java_app
-              git clone https://github.com/efsavage/hello-world-war.git
-              cd /java_app/hello-world-war
-              mvn package
-              aws s3 cp /java_app/hello-world-war/target/hello-world-war-1.0.0.war s3://java-app-ds14/hello-world-war-1.0.0.war
-              EOF
+
+  provisioner "local-exec" {command = "ansible-playbook -u ubuntu -i aws_instance.buildserver.public_ip --private-key /root/keys/terraform.pem build.yml"}
 
 }
 
-resource "aws_instance" "tomcatserver" {
-  ami = "ami-0fb653ca2d3203ac1"
-  instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.allow-tomcat.id]
-  tags = {
-    Name = "tomcatserver"
-  }
-  key_name = "terraform"
-
-  provisioner "file" {
-    source = "/root/.aws/credentials"
-    destination = "/home/ubuntu/credentials"
-  }
-  connection {
-    type = "ssh"
-    host = aws_instance.tomcatserver.public_ip
-    user = "ubuntu"
-    private_key = file("/root/keys/terraform.pem")
-  }
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo -i
-              apt update
-              apt install -y docker.io awscli
-              mkdir /root/.aws
-              cp /home/ubuntu/credentials /root/.aws/credentials
-              mkdir /java_app
-              aws s3 cp s3://java-app-ds14/hello-world-war-1.0.0.war /java_app/hello-world-war-1.0.0.war
-              docker run -d -p 8080:8080 -v /java_app:/usr/local/tomcat/webapps tomcat:jre8-alpine
-              EOF
-  depends_on = [aws_instance.buildserver]
-}

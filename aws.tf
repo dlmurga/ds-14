@@ -60,7 +60,7 @@ resource "aws_instance" "buildserver" {
   key_name = "terraform"
 
   provisioner "remote-exec" {
-    inline = ["echo server is up"]
+    inline = ["sudo apt update"]
   }
   connection {
     type = "ssh"

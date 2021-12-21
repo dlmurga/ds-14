@@ -73,7 +73,7 @@ resource "aws_instance" "buildserver" {
     command = "echo '[buildserver]' > buildserver && echo ${self.public_ip} >> buildserver"
   }
 
-  provisioner "local-exec" {command = "ansible-playbook -i buildserver build.yml"}
+  provisioner "local-exec" {command = "ansible-playbook -u ubuntu -i buildserver build.yml"}
 
 }
 

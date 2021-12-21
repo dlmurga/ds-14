@@ -6,11 +6,13 @@
     - cred.yml
 
   tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
     - name: ensure recuired packages are installed
       apt:
         name: [ 'default-jdk', 'maven', 'git', 'python-pip', 'python3-pip' ]
         state: present
-        update_cache: yes
 
     - name: Ensure boto is installed
       pip:
